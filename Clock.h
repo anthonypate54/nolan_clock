@@ -31,6 +31,7 @@ private:
     struct tm *_localTime;
 
     void init();
+    void initResources();
     void update();
     void run();
     void draw();
@@ -50,5 +51,5 @@ private:
 
 public:
     Clock(float width, float height);
-    ~Clock() {}
+    ~Clock();
 };

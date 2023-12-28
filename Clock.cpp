@@ -2,6 +2,13 @@
 #include "Clock.h"
 #include <cmath>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <filesystem>
+#include <string>
+#include <mach-o/dyld.h>
 
 using namespace std;
 
@@ -13,20 +20,68 @@ Clock::Clock(float width, float height)
     _clockWindow.create(sf::VideoMode(_width, _height), "Nolan's Clock");
     _clockWindow.setFramerateLimit(60);
 
-    if (!_theFont.loadFromFile("res/Arial Unicode.ttf"))
-    {
-        cout << "not found";
-        exit(0);
-    }
-
-    if (!_texture.loadFromFile("res/nolan.jpg"))
-    {
-        cout << "nolan.jpg not found";
-        exit(0);
-    }
-
+    initResources();
     init();
     run();
+}
+
+void Clock::initResources()
+{
+    unsigned int bufferSize = 1024;
+
+    char buffer[bufferSize];
+    // char *buffer;
+    //  buffer = (char *)malloc(bufferSize);
+
+    if (_NSGetExecutablePath(&buffer[0], &bufferSize) == 0)
+    {
+        cout << "executable path is " << buffer << endl;
+    }
+    else
+    {
+        cout << "could not find path " << buffer << endl;
+    }
+
+    char pathbuf[1024];
+    strcpy(pathbuf, buffer);
+
+    // free(buffer);
+
+    std::string fontPath;
+    std::string path = pathbuf;
+    size_t found = path.rfind("/");
+    path.replace(found, path.length(), "/");
+
+    fontPath = path + "Arial Unicode.ttf";
+    //   cout << fontPath + "\n";
+    bool exist = std::filesystem::exists(fontPath);
+    if (!exist)
+    {
+        cout << "cant open font file " << fontPath << "\n";
+        exit(1);
+    }
+    else
+    {
+        // cout << "file exists";
+    }
+    std::string imagePath = path + "nolan.jpg";
+    //   cout << imagePath + "\n";
+
+    if (!_texture.loadFromFile(imagePath))
+    {
+        cout << "nolan.jpg not found";
+        exit(1);
+    }
+
+    if (!_theFont.loadFromFile(fontPath))
+    {
+        cout << "not found";
+        exit(1);
+    }
+}
+
+Clock::~Clock()
+{
 }
 
 void Clock::init()
