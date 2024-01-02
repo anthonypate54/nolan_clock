@@ -18,7 +18,7 @@ private:
     sf::RectangleShape _hourHandShape;
     sf::RectangleShape _dayShape;
 
-    sf::Text _hourStringShape;
+    sf::Text _theText;
     sf::Font _theFont;
     sf::Texture _texture;
 

@@ -78,6 +78,12 @@ void Clock::initResources()
         cout << "not found";
         exit(1);
     }
+
+    _theText.setFont(_theFont);
+    _theText.setFillColor(sf::Color::White);
+    _theText.setStyle(sf::Text::Bold);
+    _theText.setCharacterSize(16);
+    _theText.setOutlineColor(sf::Color::Black);
 }
 
 Clock::~Clock()
@@ -133,7 +139,7 @@ void Clock::init()
     initRect(_hourHandShape, _centerX, _centerY, 2, circleRadius - 60, sf::Color::Black);
 
     _dayShape.setSize(sf::Vector2f(20, 15));
-    initRect(_dayShape, _centerX + circleRadius - 60, _centerY - 7, 0, 0, sf::Color(197, 240, 251));
+    initRect(_dayShape, _centerX + (circleRadius * 0.6f), _centerY - 7, 0, 0, sf::Color(197, 240, 251));
 }
 
 void Clock::update()
@@ -204,29 +210,26 @@ void Clock::draw()
     // now draw the hour numbers
     // could have done this in the above loop
     // maybe refactor
-    sf::Text myText;
-    myText.setFont(_theFont);
-    myText.setFillColor(sf::Color::White);
-    myText.setStyle(sf::Text::Bold);
-    myText.setCharacterSize(16);
-    myText.setOutlineColor(sf::Color::Black);
 
     angle = 0.f;
-    float clockRadius = min_value(_width, _height * 0.8 * 0.5);
+
+    // the amount to move the text away from the circle
+    const float radiusOffset = 0.4166f;
+    float radius = min_value(_width * radiusOffset, _height * radiusOffset);
+
     int num = 12;
     for (int i = 0; i < 12; i++)
     {
-        float x = _centerX + (clockRadius + 5) * cos(-30 * i * (M_PI / 180) + M_PI / 2);
-        float y = _centerY - (clockRadius + 5) * sin(-30 * i * (M_PI / 180) + M_PI / 2);
+        float x = _centerX + (radius)*cos(-30 * i * (M_PI / 180) + M_PI / 2);
+        float y = _centerY - (radius)*sin(-30 * i * (M_PI / 180) + M_PI / 2);
+        _theText.setString(std::to_string(num));
 
-        myText.setString(std::to_string(num));
-
-        const sf::FloatRect bounds(myText.getLocalBounds());
+        const sf::FloatRect bounds(_theText.getLocalBounds());
 
         x = x - bounds.width / 2;
         y = y - bounds.height / 2 - (bounds.left + bounds.top / 2);
-        myText.setPosition(x, y);
-        _clockWindow.draw(myText);
+        _theText.setPosition(x, y);
+        _clockWindow.draw(_theText);
 
         num++;
         if (num > 12)
@@ -236,16 +239,23 @@ void Clock::draw()
     _minuteHandShape.setRotation(6 * getMinute() + getSecond() * 0.1);
     _hourHandShape.setRotation(30 * getHour() + getMinute() * 0.5);
 
-    const sf::FloatRect dayBounds = myText.getLocalBounds();
+    const sf::FloatRect textBounds = _theText.getLocalBounds();
 
-    myText.setString(std::to_string(getDay()));
+    _theText.setString(std::to_string(getDay()));
 
-    myText.setPosition(_centerX + (_minMax / 2) - 60, _centerY - dayBounds.height / 2 - (dayBounds.left + dayBounds.top / 2));
-    myText.setFillColor(sf::Color::Black);
-    myText.setStyle(sf::Text::Bold);
-    myText.setCharacterSize(16);
+    sf::Vector2 dayPos = _dayShape.getPosition();
+    sf::FloatRect dayBounds = _dayShape.getLocalBounds();
 
-    _clockWindow.draw(myText);
+    int xOffset = dayBounds.width - (textBounds.width - textBounds.left);
+    int yOffset = (dayBounds.height - (textBounds.height - textBounds.top)) / 2;
+
+    _theText.setPosition(dayPos.x + xOffset, dayPos.y - yOffset);
+
+    _theText.setFillColor(sf::Color::Black);
+    _theText.setStyle(sf::Text::Bold);
+    _theText.setCharacterSize(16);
+
+    _clockWindow.draw(_theText);
     _clockWindow.draw(_secondHandShape);
     _clockWindow.draw(_minuteHandShape);
     _clockWindow.draw(_hourHandShape);
