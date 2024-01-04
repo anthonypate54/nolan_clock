@@ -19,6 +19,7 @@ private:
     sf::RectangleShape _dayShape;
 
     sf::Text _theText;
+    sf::Text _dayText;
     sf::Font _theFont;
     sf::Texture _texture;
 
