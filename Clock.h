@@ -2,6 +2,9 @@
 #include <math.h>
 #include <time.h>
 #include "SFML/Graphics.hpp"
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 class Clock
 {

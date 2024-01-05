@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <filesystem>
 #include <string>
+#ifdef __APPLE__
+#include <filesystem>
 #include <mach-o/dyld.h>
-
+#endif
 using namespace std;
 
-bool testCase = false;
 Clock::Clock(float width, float height)
 {
     _width = width;
@@ -28,6 +28,10 @@ Clock::Clock(float width, float height)
 
 void Clock::initResources()
 {
+    std::string fontPath;
+    std::string imagePath;
+
+#ifdef __APPLE__
     unsigned int bufferSize = 1024;
 
     char buffer[bufferSize];
@@ -46,9 +50,6 @@ void Clock::initResources()
     char pathbuf[1024];
     strcpy(pathbuf, buffer);
 
-    // free(buffer);
-
-    std::string fontPath;
     std::string path = pathbuf;
     size_t found = path.rfind("/");
     path.replace(found, path.length(), "/");
@@ -65,8 +66,14 @@ void Clock::initResources()
     {
         // cout << "file exists";
     }
-    std::string imagePath = path + "nolan.jpg";
-    //   cout << imagePath + "\n";
+#endif
+#ifdef _WIN32
+    std::string imagePath = "nolan.jpg";
+    fontPath = "c:\\Windows\\Fonts\\Arial.ttf";
+#endif
+#ifdef __APPLE__
+    imagePath = path + "nolan.jpg";
+#endif
 
     if (!_texture.loadFromFile(imagePath))
     {
@@ -144,7 +151,7 @@ void Clock::init()
     _hourHandShape.setSize(sf::Vector2f(2, circleRadius - 60));
     initRect(_hourHandShape, _centerX, _centerY, 2, circleRadius - 60, sf::Color::Black);
 
-    int textSize = 15 * (_width / 300);
+    int textSize = 15 * (min_value(_width, _height) / 300);
     _theText.setCharacterSize(textSize);
     _dayText.setCharacterSize(textSize);
     _dayShape.setSize(sf::Vector2f(circleRadius * 0.14666f, circleRadius * 0.1333f));
@@ -179,7 +186,6 @@ void Clock::run()
 
                 _width = _clockWindow.getSize().x;
                 _height = _clockWindow.getSize().y;
-                testCase = true;
                 init();
             }
         }
